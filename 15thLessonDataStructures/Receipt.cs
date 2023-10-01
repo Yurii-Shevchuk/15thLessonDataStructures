@@ -26,7 +26,7 @@ namespace _15thLessonDataStructures
         }
         public override string ToString()
         {
-            return @$"===== Receipt =====)
+            return @$"===== Receipt =====
 Buyer: {_buyerName}.
 Product: {_productName}.
 Price: {_price:C2} each.

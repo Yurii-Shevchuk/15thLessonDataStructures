@@ -11,11 +11,16 @@ namespace _15thLessonDataStructures
         private List<Product> _products;
         private List<Receipt> _receipts;
         private List<Product> _productCart;
+        private List<User> _users;
+
+        private User _currentUser;
         public Shop() 
         {
             _products = new List<Product>();
             _receipts = new List<Receipt>();
             _productCart = new List<Product>();
+            _users = new List<User>();
+            _currentUser = new User();
         }
         public List<Product> Products => _products;
 
@@ -23,15 +28,32 @@ namespace _15thLessonDataStructures
 
         public List<Receipt> Receipts => _receipts;
 
+        public User CurrentUser
+        {
+            get => _currentUser; 
+            private set => _currentUser = value;
+        }
+        public List<User> UserList
+        {
+            get => _users;
+            private set => _users = value;
+        }
+
         public void ShopMenu(ref bool isExit)
         {
+            Console.WriteLine("\n");
             Console.WriteLine("1. List all products");
             Console.WriteLine("2. Add new product");
-            Console.WriteLine("3. Add a product to your cart");
-            Console.WriteLine("4. Show your cart");
-            Console.WriteLine("5. Proceed to checkout");
-            Console.WriteLine("6. Print all receipts");
-            Console.WriteLine("7. Exit the program");
+            Console.WriteLine("3. Restock existing product (increase quantity)");
+            Console.WriteLine("4. Add a product to your cart");
+            Console.WriteLine("5. Show your cart");
+            Console.WriteLine("6. Proceed to checkout");
+            Console.WriteLine("7. Print all receipts");
+            Console.WriteLine("8. Create and switch to a new user (default is John)");
+            Console.WriteLine("9. Switch to existing user");
+            Console.WriteLine("10. Exit the program");
+            Console.WriteLine("\n");
+            Console.Write("Please choose an option: ");
             int input;
             try
             {
@@ -59,8 +81,23 @@ namespace _15thLessonDataStructures
                     AddProduct(Shop.ReadProductFromConsole());
                     break;
                 case 3:
-                    Console.Write("Enter name of the product you'd like to add your cart: ");
+                    Console.Write("Enter name of the product that needs restocking: ");
                     string productName = Console.ReadLine();
+                    try
+                    {
+                        Product foundProduct = GetProductByName(productName);
+                        int quantityToRestock = int.Parse(Console.ReadLine());
+                        RestockProduct(foundProduct, quantityToRestock);
+                        Console.WriteLine($"{foundProduct.Name} has been restocked!");
+                    }
+                    catch 
+                    {
+                        Console.WriteLine($"No such product in our shop or quantity is invalid, try again");
+                    }
+                    break;
+                case 4:
+                    Console.Write("Enter name of the product you'd like to add your cart: ");
+                    productName = Console.ReadLine();
                     try
                     {
                         Product foundProduct = GetProductByName(productName);
@@ -72,19 +109,44 @@ namespace _15thLessonDataStructures
                         Console.WriteLine($"No such product in our shop, try again");
                     }
                     break;
-                case 4:
+                case 5:
                     ListProductCart(ProductCart);
                     break;
-                case 5:
+                case 6:
                     Checkout(ProductCart);
                     break;
-                case 6:
+                case 7:
                     foreach(var receipt in Receipts)
                     {
                         Console.WriteLine(receipt);
                     }
                     break;
-                case 7:
+                case 8:
+                    Console.Write($"Enter new user's name or nickname: ");
+                    string newUserName = Console.ReadLine().Trim();
+                    SwitchCurrentUser(CreateNewUser(newUserName));
+                    AddUserToList(CurrentUser);
+                    break;
+                case 9:
+                    Console.WriteLine("Current list of user is: ");
+                    foreach(var user in UserList)
+                    {
+                        Console.WriteLine($"{user.Name}");
+                    }
+                    Console.Write($"Enter user name you want to switch to: ");
+                    newUserName = Console.ReadLine().Trim();
+                    try
+                    {
+                        User foundUser = GetUserByName(newUserName);
+                        SwitchCurrentUser(foundUser);
+                        Console.WriteLine($"Switched to {CurrentUser.Name}");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"No such user registered, try again");
+                    }
+                    break;
+                case 10:
                     isExit = true;
                     return;
                 default:
@@ -134,7 +196,7 @@ namespace _15thLessonDataStructures
                 {
                     try
                     {
-                        Console.WriteLine($"Please enter number of {product.Name} you'd like to buy, we have {product.Quantity} in stock, each costs {product.Price}");
+                        Console.WriteLine($"Please enter number of {product.Name} you'd like to buy, we have {product.Quantity} in stock, each costs {product.Price:C2}");
                         quantity = int.Parse(Console.ReadLine());
                     }
                     catch
@@ -143,7 +205,7 @@ namespace _15thLessonDataStructures
                     }
                 } while (quantity > product.Quantity);
                 ReduceQuantityOfProduct(product, quantity);
-                Receipt purchaseReceipt = GenerateReceipt(new User(), product, quantity);
+                Receipt purchaseReceipt = GenerateReceipt(CurrentUser, product, quantity);
                 AddReceiptToList(purchaseReceipt);
             }
             Console.WriteLine("Thanks for the purchase, please come again");
@@ -159,6 +221,11 @@ namespace _15thLessonDataStructures
             { 
                 product.Quantity -= quantity; 
             }
+        }
+
+        private void RestockProduct(Product product, int quantity)
+        {
+                product.Quantity += quantity;
         }
 
         private void RemoveProductIfNoneLeft(List<Product> products, Product product)
@@ -198,6 +265,33 @@ namespace _15thLessonDataStructures
         {
                 Product match = Products.Find(product => product.Name.ToLower().Contains(productName.ToLower()));
                 return match;
+        }
+
+        private User GetUserByName(string userName)
+        {
+            User match = UserList.Find(user => user.Name.ToLower().Contains(userName.ToLower()));
+            return match;
+        }
+        private User CreateNewUser(string name)
+        {
+            return new User(name);
+        }
+
+        private void AddUserToList(User user)
+        {
+            UserList.Add(user);
+        }
+
+        private void SwitchCurrentUser(User user)
+        {
+            if(user != null)
+            {
+            CurrentUser = user;
+            }
+            else
+            {
+                throw new NullReferenceException();
+            }
         }
 
     }
