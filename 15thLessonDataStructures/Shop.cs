@@ -86,6 +86,7 @@ namespace _15thLessonDataStructures
                     try
                     {
                         Product foundProduct = GetProductByName(productName);
+                        Console.Write("Enter amount to be added: ");
                         int quantityToRestock = int.Parse(Console.ReadLine());
                         RestockProduct(foundProduct, quantityToRestock);
                         Console.WriteLine($"{foundProduct.Name} has been restocked!");
