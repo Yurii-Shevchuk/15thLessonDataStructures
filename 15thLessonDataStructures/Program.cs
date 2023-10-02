@@ -6,9 +6,10 @@
         {
             bool isExit = false;
             Shop shop = new Shop();
+            ShopInterface shopUI = new ShopInterface(shop);
             while(!isExit)
             {
-                shop.ShopMenu(ref isExit);
+                shopUI.ShopMenu(ref isExit);
             }
         }
     }
